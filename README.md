@@ -86,6 +86,6 @@ create table daily_briefs (
 
 - **框架**: Next.js 15 (App Router)
 - **数据库**: Supabase
-- **模型**: OpenRouter → claude-3.5-haiku
+- **模型**: OpenRouter → claude-4.6-sonnet
 - **部署**: Vercel（含 Cron Jobs）
 - **域名**: nomiluo.com（Cloudflare DNS）
