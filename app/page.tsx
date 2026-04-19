@@ -45,7 +45,7 @@ export default function HomePage() {
           <span className={styles.logoChar}>螺</span>
           <span className={styles.logoText}>nomiluo</span>
         </div>
-        <a href="/chat" className={styles.chatLink}>先聊聊 →</a>
+        <a href="/chat" className={styles.chatLink}>试试她 →</a>
       </header>
 
       {/* 主体 */}
@@ -62,6 +62,14 @@ export default function HomePage() {
           饭煮好了，事情理好了，重要的日子她记得。<br />
           你回来只看见结果，不见过程。
         </p>
+
+        {/* aha moment 入口 */}
+        <div className={styles.ahaEntry}>
+          <p className={styles.ahaHint}>有没有一个人，你一直想联系却还没联系？</p>
+          <a href="/chat" className={styles.ahaBtn}>
+            让她帮你写第一句话 →
+          </a>
+        </div>
 
         {/* 邮件收集 */}
         <div className={styles.waitlistBox}>
@@ -122,7 +130,7 @@ export default function HomePage() {
 
       {/* 底部 */}
       <footer className={styles.footer}>
-        <p>马时科技 · 2026</p>
+        <p>Mashi · 2026</p>
         <p className={styles.footerLinks}>
           <a href="mailto:hello@nomiluo.com">hello@nomiluo.com</a>
           <span>·</span>
