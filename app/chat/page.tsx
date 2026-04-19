@@ -3,106 +3,101 @@
 import { useState, useRef, useEffect } from 'react'
 import styles from './chat.module.css'
 
-interface Message {
-  role: 'user' | 'assistant'
-  content: string
+type Step = 'ask' | 'loading' | 'result'
+type Tone = 'friend' | 'warm' | 'brief'
+
+const TONES: { key: Tone; label: string }[] = [
+  { key: 'friend', label: '像老朋友' },
+  { key: 'warm',   label: '更温暖一点' },
+  { key: 'brief',  label: '短一点就好' },
+]
+
+function detectLang(name: string): 'en' | 'zh' {
+  return /[a-zA-Z]/.test(name) && !/[\u4e00-\u9fa5]/.test(name) ? 'en' : 'zh'
 }
 
 export default function ChatPage() {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      role: 'assistant',
-      content: '你好，我在这里。\n\n有什么想说的，或者想让我帮你做的？',
-    },
-  ])
-  const [input, setInput] = useState('')
-  const [isStreaming, setIsStreaming] = useState(false)
-  const bottomRef = useRef<HTMLDivElement>(null)
-  const inputRef = useRef<HTMLTextAreaElement>(null)
+  const [step, setStep]           = useState<Step>('ask')
+  const [name, setName]           = useState('')
+  const [tone, setTone]           = useState<Tone>('friend')
+  const [message, setMessage]     = useState('')
+  const [copied, setCopied]       = useState(false)
+  const [regenLoading, setRegenLoading] = useState(false)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  const lang = detectLang(name)
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
+    if (step === 'ask') inputRef.current?.focus()
+  }, [step])
 
-  async function sendMessage() {
-    const text = input.trim()
-    if (!text || isStreaming) return
-
-    const newMessages: Message[] = [...messages, { role: 'user', content: text }]
-    setMessages(newMessages)
-    setInput('')
-    setIsStreaming(true)
-
-    // 添加空的 assistant 消息，逐步填充
-    setMessages(prev => [...prev, { role: 'assistant', content: '' }])
-
+  // ── 生成草稿 ──
+  async function generate(targetName: string, targetTone: Tone) {
     try {
-      const res = await fetch('/api/chat', {
+      const res = await fetch('/api/draft', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: newMessages }),
+        body: JSON.stringify({
+          name: targetName,
+          lang: detectLang(targetName),
+          tone: targetTone,
+        }),
       })
-
-      if (!res.body) throw new Error('No stream')
-
-      const reader = res.body.getReader()
-      const decoder = new TextDecoder()
-      let buffer = ''
-
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
-
-        buffer += decoder.decode(value, { stream: true })
-        const lines = buffer.split('\n')
-        buffer = lines.pop() ?? ''
-
-        for (const line of lines) {
-          if (!line.startsWith('data: ')) continue
-          const data = line.slice(6)
-          if (data === '[DONE]') continue
-
-          try {
-            const json = JSON.parse(data)
-            const delta = json.choices?.[0]?.delta?.content ?? ''
-            if (delta) {
-              setMessages(prev => {
-                const updated = [...prev]
-                updated[updated.length - 1] = {
-                  role: 'assistant',
-                  content: updated[updated.length - 1].content + delta,
-                }
-                return updated
-              })
-            }
-          } catch {}
-        }
-      }
-    } catch (err) {
-      setMessages(prev => {
-        const updated = [...prev]
-        updated[updated.length - 1] = {
-          role: 'assistant',
-          content: '出了点问题，稍后再试？',
-        }
-        return updated
-      })
-    } finally {
-      setIsStreaming(false)
-      inputRef.current?.focus()
+      const data = await res.json()
+      return data.message as string
+    } catch {
+      return detectLang(targetName) === 'en'
+        ? `Hey ${targetName} — randomly thought of you today. Hope you're doing well.`
+        : `${targetName}，最近突然想到你，不知道你现在怎么样。`
     }
   }
 
-  function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault()
-      sendMessage()
-    }
+  // ── 开始 ──
+  async function handleStart() {
+    if (!name.trim()) return
+    setStep('loading')
+    const msg = await generate(name.trim(), tone)
+    setMessage(msg)
+    setStep('result')
+  }
+
+  // ── 换语气 ──
+  async function handleTone(t: Tone) {
+    setTone(t)
+    setRegenLoading(true)
+    const msg = await generate(name.trim(), t)
+    setMessage(msg)
+    setRegenLoading(false)
+    setCopied(false)
+  }
+
+  // ── 换一个 ──
+  async function handleRegen() {
+    setRegenLoading(true)
+    const msg = await generate(name.trim(), tone)
+    setMessage(msg)
+    setRegenLoading(false)
+    setCopied(false)
+  }
+
+  // ── 复制 ──
+  function handleCopy() {
+    navigator.clipboard.writeText(message)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2200)
+  }
+
+  // ── 重来 ──
+  function handleRestart() {
+    setName('')
+    setTone('friend')
+    setMessage('')
+    setCopied(false)
+    setStep('ask')
   }
 
   return (
     <div className={styles.page}>
-      {/* 背景装饰 */}
       <div className={styles.bgOrb} />
 
       {/* 顶栏 */}
@@ -115,64 +110,116 @@ export default function ChatPage() {
         <div />
       </header>
 
-      {/* 消息列表 */}
-      <div className={styles.messages}>
-        {messages.map((msg, i) => (
-          <div
-            key={i}
-            className={`${styles.bubble} ${
-              msg.role === 'user' ? styles.userBubble : styles.assistantBubble
-            }`}
-          >
-            {msg.role === 'assistant' && (
-              <div className={styles.avatar}>螺</div>
-            )}
-            <div className={styles.bubbleContent}>
-              {msg.content.split('\n').map((line, j) => (
-                <span key={j}>
-                  {line}
-                  {j < msg.content.split('\n').length - 1 && <br />}
-                </span>
-              ))}
-              {msg.role === 'assistant' && isStreaming && i === messages.length - 1 && (
-                <span className={styles.cursor} />
-              )}
-            </div>
-          </div>
-        ))}
-        <div ref={bottomRef} />
-      </div>
-
-      {/* 输入栏 */}
-      <div className={styles.inputArea}>
-        <div className={styles.inputBox}>
-          <textarea
+      {/* ── STEP 1: 问题 ── */}
+      {step === 'ask' && (
+        <div className={styles.stepWrap}>
+          <div className={styles.shellIcon}>🐚</div>
+          <h2 className={styles.askTitle}>
+            {lang === 'en'
+              ? 'Is there someone you\'ve been meaning to reach out to?'
+              : '你最近有没有一个\n一直想联系、却还没联系的人？'}
+          </h2>
+          <p className={styles.askHint}>
+            {lang === 'en' ? 'Just a name is enough' : '不用想太多，一个名字就够了'}
+          </p>
+          <input
             ref={inputRef}
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="说点什么…"
-            rows={1}
-            className={styles.textarea}
-            disabled={isStreaming}
+            className={styles.nameInput}
+            value={name}
+            onChange={e => setName(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && handleStart()}
+            placeholder={lang === 'en' ? 'e.g. John / old friend' : '比如：John / 老朋友 / 前同事'}
+            maxLength={30}
+            autoComplete="off"
           />
           <button
-            onClick={sendMessage}
-            disabled={!input.trim() || isStreaming}
-            className={styles.sendBtn}
+            className={styles.startBtn}
+            onClick={handleStart}
+            disabled={!name.trim()}
           >
-            {isStreaming ? (
-              <span className={styles.spinner} />
-            ) : (
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                <line x1="22" y1="2" x2="11" y2="13" />
-                <polygon points="22 2 15 22 11 13 2 9 22 2" />
-              </svg>
-            )}
+            {lang === 'en' ? 'Write it for me' : '帮我写'}
           </button>
         </div>
-        <p className={styles.inputHint}>Enter 发送 · Shift+Enter 换行</p>
-      </div>
+      )}
+
+      {/* ── STEP 2: 生成中 ── */}
+      {step === 'loading' && (
+        <div className={styles.stepWrap}>
+          <div className={`${styles.shellIcon} ${styles.shellBreathing}`}>🐚</div>
+          <p className={styles.loadingText}>
+            {lang === 'en' ? 'Finding the right words…' : '她在想该怎么开口…'}
+          </p>
+          <p className={styles.loadingSub}>
+            {lang === 'en' ? 'Helping you with the first line' : '帮你把第一句话想好'}
+          </p>
+        </div>
+      )}
+
+      {/* ── STEP 3: 结果 ── */}
+      {step === 'result' && (
+        <div className={styles.stepWrap}>
+          <p className={styles.resultLabel}>
+            {lang === 'en'
+              ? `She wrote this for ${name}`
+              : `她帮你给 ${name} 想好了`}
+          </p>
+
+          {/* 消息卡片 */}
+          <div className={`${styles.messageCard} ${regenLoading ? styles.cardLoading : ''}`}>
+            <span className={styles.cardQuote}>"</span>
+            <p className={styles.messageText}>
+              {regenLoading ? '…' : message}
+            </p>
+          </div>
+
+          {/* 主操作 */}
+          <div className={styles.actions}>
+            <button
+              className={`${styles.copyBtn} ${copied ? styles.copyBtnDone : ''}`}
+              onClick={handleCopy}
+              disabled={regenLoading}
+            >
+              {copied
+                ? (lang === 'en' ? '✓ Copied' : '✓ 已复制')
+                : (lang === 'en' ? 'Copy message' : '复制这条消息')}
+            </button>
+            <button
+              className={styles.regenBtn}
+              onClick={handleRegen}
+              disabled={regenLoading}
+            >
+              {regenLoading
+                ? (lang === 'en' ? 'Rewriting…' : '换一个…')
+                : (lang === 'en' ? 'Try another' : '换一个语气')}
+            </button>
+          </div>
+
+          {/* 语气切换 */}
+          <div className={styles.toneRow}>
+            {TONES.map(t => (
+              <button
+                key={t.key}
+                className={`${styles.toneBtn} ${tone === t.key ? styles.toneBtnActive : ''}`}
+                onClick={() => handleTone(t.key)}
+                disabled={regenLoading}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+
+          {/* 钩子 */}
+          <p className={styles.hook}>
+            {lang === 'en'
+              ? 'She can help with things like this, whenever you need.'
+              : '以后这种事，我可以帮你慢慢处理。'}
+          </p>
+
+          <button className={styles.restartBtn} onClick={handleRestart}>
+            {lang === 'en' ? 'Try someone else' : '换一个人试试'}
+          </button>
+        </div>
+      )}
     </div>
   )
 }
