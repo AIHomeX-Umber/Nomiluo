@@ -1,0 +1,8 @@
+{
+  "/_not-found/page": "/_not-found",
+  "/api/waitlist/route": "/api/waitlist",
+  "/api/daily-brief/route": "/api/daily-brief",
+  "/page": "/",
+  "/chat/page": "/chat",
+  "/api/chat/route": "/api/chat"
+}

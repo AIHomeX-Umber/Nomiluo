@@ -1,0 +1,36 @@
+{
+  "version": 3,
+  "middleware": {},
+  "functions": {
+    "/api/chat/route": {
+      "files": [
+        "server/server-reference-manifest.js",
+        "server/app/api/chat/route_client-reference-manifest.js",
+        "server/middleware-build-manifest.js",
+        "server/middleware-react-loadable-manifest.js",
+        "server/next-font-manifest.js",
+        "server/interception-route-rewrite-manifest.js",
+        "server/edge-runtime-webpack.js",
+        "server/app/api/chat/route.js"
+      ],
+      "name": "app/api/chat/route",
+      "page": "/api/chat/route",
+      "matchers": [
+        {
+          "regexp": "^/api/chat$",
+          "originalSource": "/api/chat"
+        }
+      ],
+      "wasm": [],
+      "assets": [],
+      "env": {
+        "__NEXT_BUILD_ID": "EA4YWJJfzlq9OV79JyRGA",
+        "NEXT_SERVER_ACTIONS_ENCRYPTION_KEY": "1H45Iop5fyxSzTm63Pxn3yBS7ITCph7X3idyDKtEzes=",
+        "__NEXT_PREVIEW_MODE_ID": "056fce72337ca478b0ee8dfb06a7fcf0",
+        "__NEXT_PREVIEW_MODE_ENCRYPTION_KEY": "a0d89b4649d38c864759578ccd3e32b0772a46f37fce57dacf5118b90db4da05",
+        "__NEXT_PREVIEW_MODE_SIGNING_KEY": "02dea26bcd174e4d77db118a734c1be44b99ad81d7f36a000296c08204d1ec47"
+      }
+    }
+  },
+  "sortedMiddleware": []
+}
