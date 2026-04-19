@@ -353,3 +353,42 @@
     padding: 24px 0 16px;
   }
 }
+/* ── 追加到 page.module.css 末尾 ── */
+
+/* aha moment 入口区 */
+.ahaEntry {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 28px;
+  padding: 24px 28px;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid var(--border, #e8d5c0);
+  border-radius: 18px;
+  backdrop-filter: blur(8px);
+  max-width: 420px;
+  width: 100%;
+}
+.ahaHint {
+  font-size: 14px;
+  color: var(--muted, #8c6a57);
+  line-height: 1.6;
+  text-align: center;
+  margin: 0;
+}
+.ahaBtn {
+  display: inline-block;
+  padding: 11px 24px;
+  font-size: 14px;
+  font-weight: 500;
+  color: white;
+  background: var(--foreground, #2c1810);
+  border-radius: 12px;
+  text-decoration: none;
+  transition: opacity 0.15s, transform 0.15s;
+}
+.ahaBtn:hover {
+  opacity: 0.85;
+  transform: translateY(-1px);
+}
