@@ -237,3 +237,235 @@
   margin-left: auto;
   margin-right: auto;
 }
+/* ── 追加到 chat.module.css 末尾 ── */
+
+/* 步骤容器 */
+.stepWrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px 80px;
+  text-align: center;
+  animation: fadeUp 0.3s ease forwards;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* 螺图标 */
+.shellIcon {
+  font-size: 36px;
+  margin-bottom: 24px;
+}
+.shellBreathing {
+  animation: breathe 2s ease-in-out infinite;
+}
+@keyframes breathe {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.1); }
+}
+
+/* ── STEP 1 ── */
+.askTitle {
+  font-family: var(--font-serif, 'Lora', Georgia, serif);
+  font-size: clamp(20px, 4.5vw, 28px);
+  font-weight: 400;
+  line-height: 1.4;
+  color: var(--foreground);
+  margin-bottom: 10px;
+  white-space: pre-line;
+  max-width: 420px;
+}
+.askHint {
+  font-size: 13px;
+  color: var(--muted, #888);
+  margin-bottom: 28px;
+}
+.nameInput {
+  width: 100%;
+  max-width: 360px;
+  padding: 13px 18px;
+  font-size: 15px;
+  text-align: center;
+  border: 1.5px solid var(--border, #e5e7eb);
+  border-radius: 14px;
+  background: white;
+  color: var(--foreground);
+  outline: none;
+  margin-bottom: 14px;
+  transition: border-color 0.2s;
+  font-family: inherit;
+}
+.nameInput:focus {
+  border-color: var(--accent, #c67a38);
+}
+.nameInput::placeholder {
+  color: var(--muted, #aaa);
+}
+.startBtn {
+  width: 100%;
+  max-width: 360px;
+  padding: 13px;
+  font-size: 14px;
+  font-weight: 500;
+  color: white;
+  background: var(--foreground, #1a1a1a);
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  font-family: inherit;
+}
+.startBtn:hover:not(:disabled) { opacity: 0.85; }
+.startBtn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+/* ── STEP 2 ── */
+.loadingText {
+  font-family: var(--font-serif, 'Lora', Georgia, serif);
+  font-size: 18px;
+  font-weight: 400;
+  color: var(--foreground);
+  margin-bottom: 8px;
+}
+.loadingSub {
+  font-size: 13px;
+  color: var(--muted, #888);
+}
+
+/* ── STEP 3 ── */
+.resultLabel {
+  font-size: 12px;
+  color: var(--muted, #888);
+  letter-spacing: 0.06em;
+  margin-bottom: 18px;
+}
+.messageCard {
+  width: 100%;
+  max-width: 440px;
+  background: white;
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: 18px;
+  padding: 28px 28px 24px;
+  margin-bottom: 18px;
+  text-align: left;
+  position: relative;
+  transition: opacity 0.2s;
+}
+.cardLoading {
+  opacity: 0.45;
+}
+.cardQuote {
+  font-family: var(--font-serif, 'Lora', Georgia, serif);
+  font-size: 52px;
+  color: #f0e8de;
+  position: absolute;
+  top: 4px;
+  left: 18px;
+  line-height: 1;
+  pointer-events: none;
+}
+.messageText {
+  font-family: var(--font-serif, 'Lora', Georgia, serif);
+  font-size: 17px;
+  line-height: 1.7;
+  color: var(--foreground);
+  font-style: italic;
+  padding-top: 18px;
+}
+
+/* 主操作 */
+.actions {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  max-width: 440px;
+  margin-bottom: 14px;
+}
+.copyBtn {
+  flex: 1;
+  padding: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  color: white;
+  background: var(--foreground, #1a1a1a);
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.2s, opacity 0.15s;
+  font-family: inherit;
+}
+.copyBtn:hover:not(:disabled) { opacity: 0.85; }
+.copyBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+.copyBtnDone { background: #4a7c59 !important; }
+
+.regenBtn {
+  padding: 12px 16px;
+  font-size: 13px;
+  color: var(--muted, #666);
+  background: white;
+  border: 1.5px solid var(--border, #e5e7eb);
+  border-radius: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.15s, color 0.15s;
+  font-family: inherit;
+}
+.regenBtn:hover:not(:disabled) {
+  border-color: var(--foreground);
+  color: var(--foreground);
+}
+.regenBtn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* 语气切换 */
+.toneRow {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+  max-width: 440px;
+  margin-bottom: 24px;
+}
+.toneBtn {
+  flex: 1;
+  padding: 8px 6px;
+  font-size: 12px;
+  color: var(--muted, #888);
+  background: white;
+  border: 1.5px solid var(--border, #e5e7eb);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+.toneBtn:hover:not(:disabled) {
+  border-color: var(--accent, #c67a38);
+  color: var(--foreground);
+}
+.toneBtnActive {
+  border-color: var(--accent, #c67a38) !important;
+  color: var(--accent, #c67a38) !important;
+  background: #fff8f2;
+}
+.toneBtn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* 钩子 + 重来 */
+.hook {
+  font-size: 13px;
+  color: var(--muted, #999);
+  font-style: italic;
+  margin-bottom: 16px;
+}
+.restartBtn {
+  font-size: 12px;
+  color: var(--muted, #aaa);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-family: inherit;
+}
+.restartBtn:hover { color: var(--foreground); }
