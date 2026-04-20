@@ -5,14 +5,18 @@ import styles from './page.module.css'
 
 export default function HomePage() {
   const [email, setEmail] = useState('')
-  const [status, setStatus] = useState<'idle' | 'loading' | 'done' | 'error'>('idle')
-  const [message, setMessage] = useState('')
+  const [emailStatus, setEmailStatus] = useState<'idle' | 'loading' | 'done' | 'error'>('idle')
+  const [emailMsg, setEmailMsg] = useState('')
+
+  // extend-moment 状态
+  const [moment, setMoment] = useState('')
+  const [momentResult, setMomentResult] = useState('')
+  const [momentStatus, setMomentStatus] = useState<'idle' | 'loading' | 'done'>('idle')
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!email) return
-    setStatus('loading')
-
+    setEmailStatus('loading')
     try {
       const res = await fetch('/api/waitlist', {
         method: 'POST',
@@ -20,21 +24,43 @@ export default function HomePage() {
         body: JSON.stringify({ email }),
       })
       if (res.ok) {
-        setStatus('done')
-        setMessage('她记下你了，会在合适的时候出现。')
+        setEmailStatus('done')
+        setEmailMsg('她记下你了，会在合适的时候出现。')
         setEmail('')
-      } else {
-        throw new Error()
-      }
+      } else throw new Error()
     } catch {
-      setStatus('error')
-      setMessage('出了点小问题，再试一次？')
+      setEmailStatus('error')
+      setEmailMsg('出了点小问题，再试一次？')
     }
+  }
+
+  async function handleMoment(e: React.FormEvent) {
+    e.preventDefault()
+    if (!moment.trim()) return
+    setMomentStatus('loading')
+    try {
+      const res = await fetch('/api/extend-moment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: moment }),
+      })
+      const data = await res.json()
+      setMomentResult(data.text || '')
+      setMomentStatus('done')
+    } catch {
+      setMomentResult('好像有点什么，说不太清楚。\n但你注意到了，\n这件事本身就有意义。')
+      setMomentStatus('done')
+    }
+  }
+
+  function handleReset() {
+    setMoment('')
+    setMomentResult('')
+    setMomentStatus('idle')
   }
 
   return (
     <main className={styles.main}>
-      {/* 背景装饰 */}
       <div className={styles.bgOrb1} />
       <div className={styles.bgOrb2} />
       <div className={styles.bgOrb3} />
@@ -45,7 +71,7 @@ export default function HomePage() {
           <span className={styles.logoChar}>螺</span>
           <span className={styles.logoText}>nomiluo</span>
         </div>
-        <a href="/chat" className={styles.chatLink}>试试她 →</a>
+        <a href="/chat" className={styles.chatLink}>先聊聊 →</a>
       </header>
 
       {/* 主体 */}
@@ -57,24 +83,74 @@ export default function HomePage() {
           <span className={styles.titleSub}>你的生活，她在默默打理</span>
         </h1>
 
-        <p className={styles.lede}>
-          你出门时，壳里的她悄悄出来——<br />
-          饭煮好了，事情理好了，重要的日子她记得。<br />
-          你回来只看见结果，不见过程。
-        </p>
+        {/* 示例卡片 — 首屏核心情绪 */}
+        <div className={styles.momentCard}>
+          <p className={styles.momentCardText}>
+            你今天其实有一刻停了一下。
+          </p>
+          <p className={styles.momentCardText}>
+            不是因为累，<br />
+            是因为突然有点不确定——
+          </p>
+          <p className={styles.momentCardText}>
+            你在做的这些事，<br />
+            是不是正在变得没那么重要了。
+          </p>
+          <p className={styles.momentCardCite}>她注意到了。</p>
+        </div>
 
-        {/* aha moment 入口 */}
-        <div className={styles.ahaEntry}>
-          <p className={styles.ahaHint}>有没有一个人，你一直想联系却还没联系？</p>
-          <a href="/chat" className={styles.ahaBtn}>
-            让她帮你写第一句话 →
-          </a>
+        {/* extend-moment 入口 */}
+        <div className={styles.momentEntry}>
+          {momentStatus === 'idle' && (
+            <form onSubmit={handleMoment} className={styles.momentForm}>
+              <p className={styles.momentPrompt}>
+                那一刻是什么时候？<br />
+                <span>随便说一句就好。</span>
+              </p>
+              <div className={styles.momentInputRow}>
+                <input
+                  type="text"
+                  value={moment}
+                  onChange={e => setMoment(e.target.value)}
+                  placeholder="今天有一刻…"
+                  className={styles.momentInput}
+                  maxLength={100}
+                />
+                <button
+                  type="submit"
+                  className={styles.momentBtn}
+                  disabled={!moment.trim()}
+                >
+                  让她接住
+                </button>
+              </div>
+            </form>
+          )}
+
+          {momentStatus === 'loading' && (
+            <div className={styles.momentLoading}>
+              <span className={styles.momentDot} />
+              <span className={styles.momentDot} />
+              <span className={styles.momentDot} />
+            </div>
+          )}
+
+          {momentStatus === 'done' && momentResult && (
+            <div className={styles.momentResult}>
+              {momentResult.split('\n').map((line, i) => (
+                <p key={i} className={styles.momentResultLine}>{line}</p>
+              ))}
+              <button onClick={handleReset} className={styles.momentReset}>
+                再说一句
+              </button>
+            </div>
+          )}
         </div>
 
         {/* 邮件收集 */}
         <div className={styles.waitlistBox}>
-          {status === 'done' ? (
-            <p className={styles.successMsg}>{message}</p>
+          {emailStatus === 'done' ? (
+            <p className={styles.successMsg}>{emailMsg}</p>
           ) : (
             <form onSubmit={handleSubmit} className={styles.form}>
               <input
@@ -88,14 +164,14 @@ export default function HomePage() {
               <button
                 type="submit"
                 className={styles.submitBtn}
-                disabled={status === 'loading'}
+                disabled={emailStatus === 'loading'}
               >
-                {status === 'loading' ? '记下了…' : '通知我'}
+                {emailStatus === 'loading' ? '记下了…' : '通知我'}
               </button>
             </form>
           )}
-          {status === 'error' && (
-            <p className={styles.errorMsg}>{message}</p>
+          {emailStatus === 'error' && (
+            <p className={styles.errorMsg}>{emailMsg}</p>
           )}
           <p className={styles.formNote}>不发广告，只在准备好时联系你。</p>
         </div>
