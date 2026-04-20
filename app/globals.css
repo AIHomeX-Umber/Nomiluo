@@ -1,31 +1,33 @@
 @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600&family=Ma+Shan+Zheng&family=Lora:ital,wght@0,400;0,500;1,400&display=swap');
 
 :root {
-  /* 暖褐色系主色调 */
-  --cream:       #F7F0E6;
-  --parchment:   #EDE0CC;
-  --sand:        #D4B896;
-  --clay:        #B8926A;
-  --terracotta:  #C4714A;
-  --umber:       #7A4F35;
-  --espresso:    #3D2314;
+  /* ── 橙色核心色系 ── */
+  --cream:       #FDFAF6;
+  --parchment:   #FEF3E8;
+  --sand:        #FDB96B;
+  --clay:        #C4610A;
+  --terracotta:  #F5820D;
+  --umber:       #8B4513;
+  --espresso:    #2C1810;
 
   /* 辅助色 */
   --moss:        #6B7F5E;
-  --dusty-rose:  #C4907A;
-  --mist:        #8FA8A0;
+  --dusty-rose:  #F5A86B;
+  --mist:        #C4A882;
 
   /* 功能色 */
-  --bg:          var(--cream);
-  --bg-warm:     var(--parchment);
+  --bg:             var(--cream);
+  --bg-warm:        var(--parchment);
   --text-primary:   var(--espresso);
   --text-secondary: var(--umber);
   --text-muted:     var(--clay);
-  --accent:      var(--terracotta);
-  --accent-soft: var(--dusty-rose);
-  --border:      rgba(180, 140, 100, 0.25);
+  --accent:         #F5820D;
+  --accent-light:   #FDB96B;
+  --accent-dark:    #C4610A;
+  --accent-soft:    #FEE8CC;
+  --border:         rgba(245, 130, 13, 0.18);
 
-  /* 字体 */
+  /* 字체 */
   --font-display: 'Ma Shan Zheng', 'Noto Serif SC', serif;
   --font-body:    'Noto Serif SC', 'Lora', serif;
   --font-latin:   'Lora', serif;
@@ -37,9 +39,9 @@
   --radius-xl: 48px;
 
   /* 阴影 */
-  --shadow-sm: 0 2px 8px rgba(61, 35, 20, 0.08);
-  --shadow-md: 0 4px 24px rgba(61, 35, 20, 0.12);
-  --shadow-lg: 0 8px 48px rgba(61, 35, 20, 0.16);
+  --shadow-sm: 0 2px 8px rgba(245, 130, 13, 0.08);
+  --shadow-md: 0 4px 24px rgba(245, 130, 13, 0.14);
+  --shadow-lg: 0 8px 48px rgba(245, 130, 13, 0.18);
 }
 
 *, *::before, *::after {
@@ -62,7 +64,7 @@ body {
 }
 
 ::selection {
-  background: rgba(196, 113, 74, 0.2);
+  background: rgba(245, 130, 13, 0.15);
   color: var(--espresso);
 }
 
